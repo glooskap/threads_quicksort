@@ -3,7 +3,9 @@ project for Operating Systems course
 
 generate random numbers in an array and then apply the quicksort algorithm in multiple threads.
 
-using pthread mutex
+uses pthread mutex
+
+creates results.dat file
 
 ## usage
 compile with pthread
