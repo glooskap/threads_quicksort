@@ -5,18 +5,15 @@ int ArgCheck(char* arg, char* pref) {
 	size_t a_length = strlen(arg);
 	size_t s_length = strlen(pref);
 
-	if( a_length <= s_length ) {
-		return -1;
-	}
+	if( a_length <= s_length ) return -1;
 
 	char* suff = malloc(sizeof(char)*10);
 
 	int i = 0;
-	while( arg[i] == pref[i]) { ++i; }
+	while( arg[i] == pref[i])
+		++i;
 
-	if( i != s_length) {
-		return -1;
-	}
+	if( i != s_length) return -1;
 
 	int j = 0;
 	while( i < a_length) {
@@ -35,9 +32,9 @@ int ArgCheck(char* arg, char* pref) {
 void printA(int start, int end) {
 	printf("\n[|");
 	int i;
-	for(i=start; i<end; i++) {
+	for(i=start; i<end; i++)
 		printf(" %d |", numbers[i]);
-	}
+	
 	printf("]\n");
 }
 
@@ -57,6 +54,7 @@ void quicksort(int left, int right) {
 		while( numbers[j] > pivot)
 			--j;
 		if (synch_type == 1) pthread_mutex_unlock(&mutx);
+		
 		if( i <= j) {
 
 			tmp = numbers[i];
@@ -87,51 +85,51 @@ void *sort(void* t) {
 
 }
 
-void merge(int l, int m, int r) {
-	// l=start of 1st subarray
-	// m=end of 1st subarray
-	// r=end of 2nd subarray
+void merge(int start, int middle, int end) {
+	// start = start of 1st subarray
+	// middle = end of 1st subarray
+	// end = end of 2nd subarray
 
     int i, j, k;
-    int n1 = m - l + 1;
-    int n2 =  r - m;
+    int n1 = middle - start + 1;
+    int n2 =  end - middle;
 
     // temp arrays
     int L[n1], R[n2];
 
     for (i = 0; i < n1; i++)
-        L[i] = numbers[l + i];
+        L[i] = numbers[start + i];
     for (j = 0; j < n2; j++)
-        R[j] = numbers[m + 1+ j];
+        R[j] = numbers[middle + 1 + j];
 
-   // Merge the temp arrays back into initial 
-    i = 0;
-    j = 0;
-    k = l;
-    while (i < n1 && j < n2) {
-        if (L[i] <= R[j]) {
-            numbers[k] = L[i];
-            i++;
-        } else {
-            numbers[k] = R[j];
-            j++;
-        }
-        k++;
-    }
+	// Merge the temp arrays back into initial 
+	i = 0;
+	j = 0;
+	k = start;
+	while (i < n1 && j < n2) {
+		if (L[i] <= R[j]) {
+			numbers[k] = L[i];
+			i++;
+		} else {
+			numbers[k] = R[j];
+			j++;
+		}
+		k++;
+	}
 
-    // Copy the remaining elements of L
-    while (i < n1) {
-        numbers[k] = L[i];
-        i++;
-        k++;
-    }
+	// Copy the remaining elements of L
+	while (i < n1) {
+		numbers[k] = L[i];
+		i++;
+		k++;
+	}
 
-    // Copy the remaining elements of R
-    while (j < n2) {
-        numbers[k] = R[j];
-        j++;
-        k++;
-    }
+	// Copy the remaining elements of R
+	while (j < n2) {
+		numbers[k] = R[j];
+		j++;
+		k++;
+	}
 }
 
 
@@ -144,13 +142,6 @@ int main(int argc, char *argv[]) {
 	arg3 = rng seed			 / -seed=X
 	arg4 = synch type		 / -mode=X
 	*/
-
-	struct timeval start_time, end_time;
-
-	if (gettimeofday(&start_time, NULL) == -1) {
-		printf("ERROR: gettimeofday failed!\n");
-		exit(-1);
-	}
 
 
 	if( argc != 5) {
@@ -181,6 +172,13 @@ int main(int argc, char *argv[]) {
 		printf("ERROR: synch mode should be 1||2||3 !\n");
 		exit(-1);
 	}
+	
+	
+	struct timeval start_time, end_time;
+	if (gettimeofday(&start_time, NULL) == -1) {
+		printf("ERROR: gettimeofday failed!\n");
+		exit(-1);
+	}
 
 
 
@@ -195,18 +193,17 @@ int main(int argc, char *argv[]) {
 
 	//generate rand numbers and insert to array
 	int i;
-	for( i = 0; i < numbers_count; i++) {
+	for( i = 0; i < numbers_count; i++)
 		numbers[i] = rand() % numbers_count;
-	}
 
 
 
 	FILE *f = fopen("results.dat", "wb");
 
 	fprintf(f, "Initial array:\n[|");
-	for( i=0; i<numbers_count; i++) {
+	for( i=0; i<numbers_count; i++)
 		fprintf(f, " %d |", numbers[i]);
-	}
+	
 	fprintf(f, "]\n");
 
 
@@ -245,8 +242,8 @@ int main(int argc, char *argv[]) {
 	}
 
 	/*
-		the last thread in case extra>0
-		or when only one thread is used
+		in case only one thread is used
+		or numbers cannot be divided evenly among threads
 	*/
 	structs[i].thread_id = i+1;
   	structs[i].start = i*size;
@@ -288,7 +285,8 @@ int main(int argc, char *argv[]) {
     }
 
 
-    //merge
+    //merge the sorted subbarays
+	
     int j = threads_count;
     int step = size;
     int ors;
@@ -309,16 +307,16 @@ int main(int argc, char *argv[]) {
 
 
 	fprintf(f, "Sorted array:\n[|");
-	for( i=0; i<numbers_count; i++) {
+	for( i=0; i<numbers_count; i++)
 		fprintf(f, " %d |", numbers[i]);
-	}
+	
 	fprintf(f, "]\n");
 
 	fclose(f);
 
 
 	//calculate proccess time
-
+	
 	if (gettimeofday(&end_time, NULL) == -1) {
 		printf("ERROR: gettimeofday failed!\n");
 		exit(-1);
